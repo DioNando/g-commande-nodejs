@@ -4,17 +4,14 @@
     class="full-width no-wrap row justify-start items-start content-start"
   >
     <q-table
-      grid
-      title="Liste des clients"
+      title="Chiffre d'affaire des clients"
       :rows="rows"
       :columns="columns"
       row-key="idClient"
       flat
       color="accent"
-      :filter="filter"
       separator="none"
       bordered
-      selection="single"
       v-model:selected="selected"
       class="col q-mr-md"
       hide-selected-banner
@@ -23,11 +20,10 @@
         <q-input
           borderless
           debounce="300"
-          label="Recherche d'un client"
-          v-model="filter"
+          type="date"
         >
           <template v-slot:prepend>
-            <q-icon name="search" />
+            <q-icon name="calendar_month" />
           </template>
         </q-input>
       </template>
@@ -40,63 +36,6 @@
         </div>
       </template>
     </q-table>
-
-    <div class="q-pa-lg bg-dark shadow-6 q-ml-md" style="width: 25rem">
-      <!-- <q-form @submit.prevent="onSubmit" @reset="onReset"> -->
-      <q-form>
-        <div v-if="selected.length" class="text-h5">Informations du client</div>
-        <div v-else class="text-h5">Aucun client selectionné</div>
-        <q-input
-          label="Identification du client"
-          readonly
-          borderless
-          v-model="client.id"
-        />
-
-        <q-input
-          label="Nom"
-          lazy-rules
-          :rules="[
-            (val) => (val && val.length > 0) || 'Veuillez saisir un nom valide',
-          ]"
-          v-model="client.nom"
-        />
-        <div
-          v-if="selected.length"
-          class="fit row no-wrap justify-between items-center content-start"
-        >
-          <div>
-            <q-btn
-              label="Modifier"
-              icon="cloud_upload"
-              type="submit"
-              color="positive"
-            />
-          </div>
-          <div>
-            <q-btn round color="negative" type="submit" icon="delete" />
-          </div>
-        </div>
-      </q-form>
-      <q-form v-if="selected.length" class="q-mt-lg">
-        <div class="text-h5">Liste des produits commandés</div>
-        <div
-          class="full-width no-wrap row justify-between items-start content-start"
-        >
-          <q-input type="date" class="col q-mr-md" />
-          <q-input type="date" class="col q-ml-md" />
-        </div>
-        <div class="q-mt-lg" align="right">
-          <q-btn
-            label="Consulter"
-            icon="search"
-            type="submit"
-            color="primary"
-          />
-        </div>
-      </q-form>
-      <div class="q-mt-md" v-if="selected.length">Client : {{ selected }}</div>
-    </div>
   </q-page>
 </template>
 
@@ -162,7 +101,7 @@ const rows = [
 ];
 
 export default defineComponent({
-  name: "PageClient",
+  name: "ChiffreClient",
   data() {
     return {
       client: {

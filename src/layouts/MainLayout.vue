@@ -31,7 +31,7 @@
     <q-drawer v-model="leftDrawerOpen" side="left" :width="400">
       <q-page padding>
         <div v-if="$route.path == '/'"><NavIndex /></div>
-        <div v-if="$route.path == '/client'"><NavClient /></div>
+        <div v-if="$route.path == '/client' || $route.path == '/chiffre-client'"><NavClient /></div>
         <div v-if="$route.path == '/produit'"><NavProduit /></div>
         <div v-if="$route.path == '/commande'"><NavCommande /></div>
       </q-page>

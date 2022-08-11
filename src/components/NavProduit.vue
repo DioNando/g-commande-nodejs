@@ -26,6 +26,17 @@
       <q-btn flat>Liste</q-btn>
     </q-card-actions>
   </q-card>
+  <!-- <q-card dark bordered flat class="my-card q-my-lg">
+    <q-card-section>
+      <div class="text-h6">Liste des produits par client</div>
+    </q-card-section>
+
+    <q-separator />
+
+    <q-card-actions vertical>
+      <q-btn flat>Liste par client</q-btn>
+    </q-card-actions>
+  </q-card> -->
 </template>
 
 <script>
