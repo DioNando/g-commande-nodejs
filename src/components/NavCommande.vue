@@ -23,20 +23,65 @@
     <q-separator />
 
     <q-card-actions vertical>
-      <q-btn flat>Liste</q-btn>
+      <q-btn flat @click="router.push(`/commande`)">Liste</q-btn>
     </q-card-actions>
   </q-card>
 </template>
 
 <script>
+import { useQuasar, QSpinnerDots } from "quasar";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 export default {
-  setup() {
+  name: "NavCommande",
+  data() {
     return {
-      dialog: ref(false),
-      maximizedToggle: ref(true),
+      produit: {
+        designation: "",
+        prixUni: "",
+        stock: "",
+      },
     };
+  },
+  setup() {
+    const router = useRouter();
+    const $q = useQuasar();
+    let timer = null;
+
+    return {
+      router,
+      persistent: ref(false),
+      timer,
+      $q,
+    };
+  },
+  methods: {
+    onSubmit() {
+      this.$q.loading.show({
+        spinner: QSpinnerDots,
+        message: "Information en cours de traitement, patientez...",
+      });
+      this.timer = setTimeout(() => {
+        this.$q.loading.hide();
+        this.router.push("/client");
+        this.$q.notify({
+          color: "positive",
+          textColor: "white",
+          icon: "cloud_done",
+          message: "Nouveau client ajouté",
+          position: "bottom-right",
+        });
+        console.log(this.client);
+        this.timer = void 0;
+      }, 1000);
+    },
+
+    onReset() {
+      this.produit.designation = "";
+      this.produit.prixUni = "";
+      this.produit.stock = "";
+    },
   },
 };
 </script>

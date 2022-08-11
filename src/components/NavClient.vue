@@ -30,53 +30,51 @@
     </q-card-actions>
   </q-card>
 
-  <div>
-    <q-dialog
-      v-model="persistent"
-      persistent
-      transition-show="fade"
-      transition-hide="fade"
+  <q-dialog
+    v-model="persistent"
+    persistent
+    transition-show="fade"
+    transition-hide="fade"
+  >
+    <q-card
+      class="bg-dark text-white q-pa-sm"
+      style="width: 500px; max-width: 80vw"
     >
-      <q-card
-        class="bg-dark text-white q-pa-sm"
-        style="width: 500px; max-width: 80vw"
-      >
-        <q-card-section class="row items-center q-pb-none">
-          <div class="text-h5">Ajouter un nouveau client</div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
-        <q-card-section>
-          <q-form @submit.prevent="onSubmit" @reset="onReset">
-            <q-input
-              label="Nom"
-              lazy-rules
-              :rules="[
-                (val) =>
-                  (val && val.length > 0) || 'Veuillez saisir un nom valide',
-              ]"
-              v-model="client.nom"
+      <q-card-section class="row items-center q-pb-none">
+        <div class="text-h5">Ajouter un nouveau client</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <q-form @submit.prevent="onSubmit" @reset="onReset">
+          <q-input
+            label="Nom"
+            lazy-rules
+            :rules="[
+              (val) =>
+                (val && val.length > 0) || 'Veuillez saisir un nom valide',
+            ]"
+            v-model="client.nom"
+          />
+          <div align="right">
+            <q-btn
+              label="Ajouter"
+              icon="cloud_upload"
+              type="submit"
+              color="positive"
             />
-            <div align="right">
-              <q-btn
-                label="Ajouter"
-                icon="cloud_upload"
-                type="submit"
-                color="positive"
-              />
-              <q-btn
-                label="Effacer"
-                type="reset"
-                color="grey-1"
-                outline
-                class="q-ml-lg"
-              />
-            </div>
-          </q-form>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-  </div>
+            <q-btn
+              label="Effacer"
+              type="reset"
+              color="grey-1"
+              outline
+              class="q-ml-lg"
+            />
+          </div>
+        </q-form>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -85,7 +83,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
-  name: "RegisterClient",
+  name: "NavClient",
   data() {
     return {
       client: {
