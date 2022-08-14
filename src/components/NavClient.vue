@@ -76,7 +76,7 @@
 import { useQuasar, QSpinnerDots } from "quasar";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { addClient } from "src/api/client";
+import { addClient, getAllClients } from "src/api/client";
 
 export default {
   name: "NavClient",

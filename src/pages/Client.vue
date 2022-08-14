@@ -19,6 +19,9 @@
       class="col q-mr-md"
       hide-selected-banner
       @selection="onRowClick"
+      v-model:pagination="pagination"
+      :rows-per-page-options="[4, 8, 12, 24, 0]"
+      :rows-per-page-label="pagination.label"
     >
       <template v-slot:top-right>
         <q-input
@@ -116,6 +119,10 @@ export default defineComponent({
   name: "PageClient",
   data() {
     return {
+      pagination: {
+        rowsPerPage: 12,
+        label: "Nombre de client par page",
+      },
       client: {
         numClient: "",
         nomClient: "",
@@ -142,6 +149,13 @@ export default defineComponent({
               icon: "edit_note",
               position: "bottom-right",
             });
+            getAllClients()
+              .then((result) => {
+                this.rows = result.data;
+              })
+              .catch((error) => {
+                console.log(error);
+              });
           })
           .catch((error) => {
             console.log(error);
@@ -178,6 +192,17 @@ export default defineComponent({
                 icon: "edit_note",
                 position: "bottom-right",
               });
+              // const index = this.rows
+              //   .map((object) => object.numClient)
+              //   .indexOf(this.client.numClient);
+              // this.rows.splice(index, 1);
+              getAllClients()
+                .then((result) => {
+                  this.rows = result.data;
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
             })
             .catch((error) => {
               console.log(error);
