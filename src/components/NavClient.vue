@@ -6,7 +6,7 @@
 
     <q-separator />
     <q-card-actions vertical>
-      <q-btn flat @click="persistent = true">Nouveau</q-btn>
+      <q-btn flat @click="modal = true">Nouveau</q-btn>
     </q-card-actions>
   </q-card>
   <q-card flat bordered class="my-card q-my-lg">
@@ -30,12 +30,7 @@
     </q-card-actions>
   </q-card>
 
-  <q-dialog
-    v-model="persistent"
-    persistent
-    transition-show="fade"
-    transition-hide="fade"
-  >
+  <q-dialog v-model="modal" transition-hide="fade">
     <q-card
       class="bg-dark text-white q-pa-sm"
       style="width: 500px; max-width: 80vw"
@@ -54,7 +49,7 @@
               (val) =>
                 (val && val.length > 0) || 'Veuillez saisir un nom valide',
             ]"
-            v-model="client.nom"
+            v-model="client.nomClient"
           />
           <div align="right">
             <q-btn
@@ -81,51 +76,67 @@
 import { useQuasar, QSpinnerDots } from "quasar";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { addClient } from "src/api/client";
 
 export default {
   name: "NavClient",
   data() {
     return {
       client: {
-        nom: "",
+        nomClient: "",
       },
     };
   },
   setup() {
+    const toast = useQuasar();
     const router = useRouter();
     const $q = useQuasar();
     let timer = null;
 
     return {
       router,
-      persistent: ref(false),
+      modal: ref(false),
       timer,
-      $q,
+      toast,
     };
   },
   methods: {
     onSubmit() {
       this.$q.loading.show({
         spinner: QSpinnerDots,
-        message: "Information en cours de traitement, patientez...",
+        message: "Informations en cours de traitement, patientez...",
       });
       this.timer = setTimeout(() => {
         this.$q.loading.hide();
-        this.router.push("/client");
-        this.$q.notify({
-          color: "positive",
-          textColor: "white",
-          icon: "cloud_done",
-          message: "Nouveau client ajouté",
-          position: "bottom-right",
-        });
-        console.log(this.client);
+        addClient(this.client)
+          .then(() => {
+            this.router.push(`/client`);
+            this.toast.notify({
+              color: "positive",
+              textColor: "white",
+              icon: "cloud_done",
+              message: "Nouveau client ajouté",
+              position: "bottom-right",
+            });
+            this.modal = false;
+          })
+          .catch((error) => {
+            console.log(error);
+            this.toast.notify({
+              type: "negative",
+              textColor: "White",
+              icon: "warning",
+              message: "Erreur lors de l'ajout du client",
+              position: "bottom-right",
+            });
+          });
+
         this.timer = void 0;
       }, 1000);
     },
 
     onReset() {
-      this.client.nom = "";
+      this.client.nomClient = "";
     },
   },
 };

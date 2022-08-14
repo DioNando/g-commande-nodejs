@@ -1,9 +1,4 @@
 <template>
-  <!-- <q-input dark standout label="Recherche d'un produit">
-    <template v-slot:prepend>
-      <q-icon name="search" />
-    </template>
-  </q-input> -->
   <q-card flat bordered class="my-card">
     <q-card-section>
       <div class="text-h6">Ajout d'un nouveau produit</div>
@@ -12,7 +7,7 @@
     <q-separator />
 
     <q-card-actions vertical>
-      <q-btn flat @click="persistent = true">Nouveau</q-btn>
+      <q-btn flat @click="modal = true">Nouveau</q-btn>
     </q-card-actions>
   </q-card>
   <q-card dark bordered flat class="my-card q-my-lg">
@@ -38,9 +33,7 @@
     </q-card-actions>
   </q-card> -->
   <q-dialog
-    v-model="persistent"
-    persistent
-    transition-show="fade"
+    v-model="modal"
     transition-hide="fade"
   >
     <q-card
@@ -55,13 +48,13 @@
       <q-card-section>
         <q-form @submit.prevent="onSubmit" @reset="onReset">
           <q-input
-            label="Designation du produit"
+            label="DesigProduit du produit"
             lazy-rules
             :rules="[
               (val) =>
                 (val && val.length > 0) || 'Veuillez saisir un nom valide',
             ]"
-            v-model="produit.designation"
+            v-model="produit.designProduit"
           />
           <div
             class="full-width no-wrap row justify-between items-start content-start"
@@ -69,7 +62,7 @@
             <q-input
               label="Prix Unitaire"
               type="number"
-              v-model="produit.prixUni"
+              v-model="produit.puProduit"
               lazy-rules
               :rules="[
                 (val) =>
@@ -81,7 +74,7 @@
             <q-input
               label="Stock"
               type="number"
-              v-model="produit.stock"
+              v-model="produit.stockProduit"
               class="col q-ml-md"
             />
           </div>
@@ -110,15 +103,16 @@
 import { useQuasar, QSpinnerDots } from "quasar";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { addProduit } from "src/api/produit";
 
 export default {
   name: "NavProduit",
   data() {
     return {
       produit: {
-        designation: "",
-        prixUni: "",
-        stock: "",
+        designProduit: "",
+        puProduit: "",
+        stockProduit: "",
       },
     };
   },
@@ -129,7 +123,7 @@ export default {
 
     return {
       router,
-      persistent: ref(false),
+      modal: ref(false),
       timer,
       $q,
     };
@@ -138,27 +132,40 @@ export default {
     onSubmit() {
       this.$q.loading.show({
         spinner: QSpinnerDots,
-        message: "Information en cours de traitement, patientez...",
+        message: "Informations en cours de traitement, patientez...",
       });
       this.timer = setTimeout(() => {
         this.$q.loading.hide();
-        this.router.push("/produit");
-        this.$q.notify({
-          color: "positive",
-          textColor: "white",
-          icon: "cloud_done",
-          message: "Nouveau produit ajouté",
-          position: "bottom-right",
-        });
-        console.log(this.produit);
+        addProduit(this.produit)
+          .then(() => {
+            this.router.push(`/produit`);
+            this.toast.notify({
+              color: "positive",
+              textColor: "white",
+              icon: "cloud_done",
+              message: "Nouveau produit ajouté",
+              position: "bottom-right",
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+            this.toast.notify({
+              type: "negative",
+              textColor: "White",
+              icon: "warning",
+              message: "Erreur lors de l'ajout du produit",
+              position: "bottom-right",
+            });
+          });
+
         this.timer = void 0;
       }, 1000);
     },
 
     onReset() {
-      this.produit.designation = "";
-      this.produit.prixUni = "";
-      this.produit.stock = "";
+      this.produit.designProduit = "";
+      this.produit.puProduit = "";
+      this.produit.stockProduit = "";
     },
   },
 };

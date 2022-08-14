@@ -8,7 +8,7 @@
       title="Liste des clients"
       :rows="rows"
       :columns="columns"
-      row-key="idClient"
+      row-key="numClient"
       flat
       color="accent"
       :filter="filter"
@@ -18,6 +18,7 @@
       v-model:selected="selected"
       class="col q-mr-md"
       hide-selected-banner
+      @selection="onRowClick"
     >
       <template v-slot:top-right>
         <q-input
@@ -42,15 +43,15 @@
     </q-table>
 
     <div class="q-pa-lg bg-dark shadow-6 q-ml-md" style="width: 25rem">
-      <!-- <q-form @submit.prevent="onSubmit" @reset="onReset"> -->
-      <q-form>
+      <q-form @submit.prevent="onSubmit">
+        <!-- <q-form> -->
         <div v-if="selected.length" class="text-h5">Informations du client</div>
         <div v-else class="text-h5">Aucun client selectionné</div>
         <q-input
           label="Identification du client"
           readonly
           borderless
-          v-model="client.id"
+          v-model="client.numClient"
         />
 
         <q-input
@@ -59,7 +60,7 @@
           :rules="[
             (val) => (val && val.length > 0) || 'Veuillez saisir un nom valide',
           ]"
-          v-model="client.nom"
+          v-model="client.nomClient"
         />
         <div
           v-if="selected.length"
@@ -67,14 +68,20 @@
         >
           <div>
             <q-btn
-              label="Modifier"
+              :loading="loading[1]"
               icon="cloud_upload"
               type="submit"
               color="positive"
-            />
+              label="Modifier"
+            >
+              <template v-slot:loading>
+                <q-spinner-dots class="on-left" />
+                MODIFIER
+              </template>
+            </q-btn>
           </div>
           <div>
-            <q-btn round color="negative" type="submit" icon="delete" />
+            <q-btn round color="negative" icon="delete" @click="onDelete" />
           </div>
         </div>
       </q-form>
@@ -95,7 +102,6 @@
           />
         </div>
       </q-form>
-      <div class="q-mt-md" v-if="selected.length">Client : {{ selected }}</div>
     </div>
   </q-page>
 </template>
@@ -103,80 +109,143 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
-
-const columns = [
-  {
-    name: "idClient",
-    required: true,
-    label: "ID",
-    align: "left",
-    field: (row) => row.idClient,
-    sortable: true,
-  },
-  {
-    name: "nomClient",
-    label: "Nom",
-    field: "nomClient",
-    align: "left",
-    sortable: true,
-  },
-];
-
-const rows = [
-  {
-    idClient: 159,
-    nomClient: "Frozen Yogurt",
-  },
-  {
-    idClient: 237,
-    nomClient: "Ice cream sandwich",
-  },
-  {
-    idClient: 262,
-    nomClient: "Eclair",
-  },
-  {
-    idClient: 305,
-    nomClient: "Cupcake",
-  },
-  {
-    idClient: 356,
-    nomClient: "Gingerbread",
-  },
-  {
-    idClient: 375,
-    nomClient: "Jelly bean",
-  },
-  {
-    idClient: 392,
-    nomClient: "Lollipop",
-  },
-  {
-    idClient: 408,
-    nomClient: "Honeycomb",
-  },
-  {
-    idClient: 452,
-    nomClient: "Donut",
-  },
-];
+import { useQuasar } from "quasar";
+import { getAllClients, updateClient, deleteClient } from "src/api/client";
 
 export default defineComponent({
   name: "PageClient",
   data() {
     return {
       client: {
-        id: "",
-        nom: "",
+        numClient: "",
+        nomClient: "",
       },
     };
   },
+  methods: {
+    onRowClick(row) {
+      this.selected = [];
+      this.selected.push(row);
+      const obj = JSON.parse(JSON.stringify(this.selected[0].rows[0]));
+      this.client.numClient = obj.numClient;
+      this.client.nomClient = obj.nomClient;
+    },
+    onSubmit() {
+      this.simulateProgress(1);
+      this.timer = setTimeout(() => {
+        updateClient(this.client.numClient, this.client)
+          .then(() => {
+            this.editing = false;
+            this.toast.notify({
+              type: "positive",
+              message: "Le client a bien été modifié",
+              icon: "edit_note",
+              position: "bottom-right",
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+            this.toast.notify({
+              type: "negative",
+              textColor: "White",
+              icon: "warning",
+              message:
+                "Erreur lors de la mise à jour des informations du client",
+              position: "bottom-right",
+            });
+          });
+      }, 1500);
+    },
+    onDelete() {
+      this.toast
+        .dialog({
+          dark: true,
+          title: "Confirmer la suppression",
+          message: "Voulez-vous supprimer le client : " + this.client.nomClient,
+          cancel: true,
+          ok: "Supprimer",
+          cancel: "Annuler",
+          persistent: true,
+          transitionHide: "fade",
+        })
+        .onOk(() => {
+          deleteClient(this.client.numClient)
+            .then(() => {
+              this.editing = false;
+              this.toast.notify({
+                type: "warning",
+                message: "Le client a bien été supprimé",
+                icon: "edit_note",
+                position: "bottom-right",
+              });
+            })
+            .catch((error) => {
+              console.log(error);
+              this.toast.notify({
+                type: "negative",
+                textColor: "White",
+                icon: "warning",
+                message: "Erreur lors de la suppression du client",
+                position: "bottom-right",
+              });
+            });
+        });
+    },
+  },
+  mounted() {},
   setup() {
+    const loading = ref([false]);
+
+    const progress = ref(false);
+    let timer = null;
+
+    function simulateProgress(number) {
+      loading.value[number] = true;
+      setTimeout(() => {
+        loading.value[number] = false;
+      }, 1500);
+    }
+
+    const toast = useQuasar();
+
+    const columns = [
+      {
+        name: "numClient",
+        required: true,
+        label: "ID",
+        align: "left",
+        field: (row) => row.numClient,
+        sortable: true,
+      },
+      {
+        name: "nomClient",
+        label: "Nom",
+        field: "nomClient",
+        align: "left",
+        sortable: true,
+      },
+    ];
+
+    const rows = ref([]);
+
+    getAllClients()
+      .then((result) => {
+        rows.value = result.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
     return {
+      toast,
       selected: ref([]),
       filter: ref(""),
       columns,
       rows,
+      progress,
+      simulateProgress,
+      loading,
+      timer,
     };
   },
 });

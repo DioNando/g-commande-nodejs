@@ -7,7 +7,7 @@
       title="Liste des produits"
       :rows="rows"
       :columns="columns"
-      row-key="idProduit"
+      row-key="numProduit"
       flat
       color="accent"
       :filter="filter"
@@ -61,7 +61,7 @@
             (val) =>
               (val && val.length > 0) || 'Veuillez saisir un produit valide',
           ]"
-          v-model="produit.designation"
+          v-model="selected[0]"
         />
         <q-input
           label="Prix Unitaire"
@@ -96,7 +96,7 @@
           </div>
         </div>
       </q-form>
-      <div class="q-mt-md" v-if="selected.length">Produit : {{ selected }}</div>
+      <div class="q-mt-md" v-if="selected.length">Produit : {{ selected[0].designProduit }}</div>
     </div>
   </q-page>
 </template>
@@ -104,94 +104,7 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
-
-const columns = [
-  {
-    name: "idProduit",
-    required: true,
-    label: "ID",
-    align: "left",
-    field: (row) => row.idProduit,
-    sortable: true,
-  },
-  {
-    name: "designProduit",
-    label: "Designation Produit",
-    field: "designProduit",
-    align: "left",
-    sortable: true,
-  },
-  {
-    name: "prixUniProduit",
-    label: "Prix Unitaire",
-    field: "prixUniProduit",
-    align: "right",
-    sortable: true,
-  },
-  {
-    name: "stockProduit",
-    label: "Stock",
-    field: "stockProduit",
-    align: "right",
-  },
-];
-
-const rows = [
-  {
-    idProduit: 159,
-    designProduit: "Frozen Yogurt",
-    prixUniProduit: 355,
-    stockProduit: 456,
-  },
-  {
-    idProduit: 237,
-    designProduit: "Ice cream sandwich",
-    prixUniProduit: 4554,
-    stockProduit: 542,
-  },
-  {
-    idProduit: 262,
-    designProduit: "Eclair",
-    prixUniProduit: 6464,
-    stockProduit: 8787,
-  },
-  {
-    idProduit: 305,
-    designProduit: "Cupcake",
-    prixUniProduit: 54,
-    stockProduit: 4657,
-  },
-  {
-    idProduit: 356,
-    designProduit: "Gingerbread",
-    prixUniProduit: 243,
-    stockProduit: 344,
-  },
-  {
-    idProduit: 375,
-    designProduit: "Jelly bean",
-    prixUniProduit: 4576,
-    stockProduit: 465,
-  },
-  {
-    idProduit: 392,
-    designProduit: "Lollipop",
-    prixUniProduit: 4654,
-    stockProduit: 8709,
-  },
-  {
-    idProduit: 408,
-    designProduit: "Honeycomb",
-    prixUniProduit: 757,
-    stockProduit: 668,
-  },
-  {
-    idProduit: 452,
-    designProduit: "Donut",
-    prixUniProduit: 6886,
-    stockProduit: 45,
-  },
-];
+import { getAllProduits } from "src/api/produit";
 
 export default defineComponent({
   name: "PageProduit",
@@ -206,6 +119,47 @@ export default defineComponent({
     };
   },
   setup() {
+    const columns = [
+      {
+        name: "numProduit",
+        required: true,
+        label: "ID",
+        align: "left",
+        field: (row) => row.numProduit,
+        sortable: true,
+      },
+      {
+        name: "designProduit",
+        label: "Designation Produit",
+        field: "designProduit",
+        align: "left",
+        sortable: true,
+      },
+      {
+        name: "puProduit",
+        label: "Prix Unitaire",
+        field: "puProduit",
+        align: "right",
+        sortable: true,
+      },
+      {
+        name: "stockProduit",
+        label: "Stock",
+        field: "stockProduit",
+        align: "right",
+      },
+    ];
+
+    const rows = ref([]);
+
+    getAllProduits()
+      .then((result) => {
+        rows.value = result.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
     return {
       selected: ref([]),
       filter: ref(""),

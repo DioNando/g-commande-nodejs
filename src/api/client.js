@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BASE_URL } from "../configs";
 
-const URL = BASE_URL + "/note";
+const URL = BASE_URL + "/client";
 
 export const addClient = (data) => {
     return axios.post(`${URL}`, data);
