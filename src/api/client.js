@@ -11,6 +11,14 @@ export const getAllClients = () => {
     return axios.get(`${URL}`);
 };
 
+export const getChiffreAffaires = () => {
+    return axios.get(`${URL}/chiffreA`);
+};
+
+export const getChiffreAffairesClient = (id, data) => {
+    return axios.get(`${URL}/ca/btdate/${id}`, data);
+};
+
 export const getClient = (id) => {
     return axios.get(`${URL}/${id}`);
 };

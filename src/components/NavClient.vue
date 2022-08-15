@@ -1,6 +1,6 @@
 <template>
   <div
-    class="text-h5 text-info q-mb-sm full-width row no-wrap justify-between items-start content-start"
+    class="text-h5 text-info q-mb-sm full-width row no-wrap justify-between items-center content-start"
   >
     <div>Client</div>
     <q-icon name="face" />
@@ -42,7 +42,10 @@
       style="width: 500px; max-width: 80vw"
     >
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h5">Ajouter un nouveau client</div>
+        <div class="text-h5 row no-wrap items-center text-warning">
+          <q-icon name="face" />
+          <div class="q-ml-sm">Ajouter un nouveau client</div>
+        </div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>

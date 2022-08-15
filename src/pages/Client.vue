@@ -1,7 +1,7 @@
 <template>
   <q-page
     padding
-    class="full-width no-wrap row justify-start items-start content-start"
+    class="full-width no-wrap row justify-between items-start content-start"
   >
     <q-table
       grid
@@ -45,66 +45,92 @@
       </template>
     </q-table>
 
-    <div class="q-pa-lg bg-dark shadow-6 q-ml-md" style="width: 25rem">
-      <q-form @submit.prevent="onSubmit">
-        <!-- <q-form> -->
-        <div v-if="selected.length" class="text-h5">Informations du client</div>
-        <div v-else class="text-h5">Aucun client selectionné</div>
-        <q-input
-          label="Identification du client"
-          readonly
-          borderless
-          v-model="client.numClient"
-        />
+    <div class="q-ml-md" style="width: 25rem">
+      <div class="q-pa-lg bg-dark shadow-6 rounded-borders">
+        <q-form @submit.prevent="onSubmit">
+          <!-- <q-form> -->
+          <div v-if="selected.length" class="text-h5">
+            Informations du client
+          </div>
+          <div v-else class="text-h5">Aucun client selectionné</div>
+          <q-input
+            label="Identification du client"
+            readonly
+            borderless
+            v-model="client.numClient"
+          />
 
-        <q-input
-          label="Nom"
-          lazy-rules
-          :rules="[
-            (val) => (val && val.length > 0) || 'Veuillez saisir un nom valide',
-          ]"
-          v-model="client.nomClient"
-        />
-        <div
-          v-if="selected.length"
-          class="fit row no-wrap justify-between items-center content-start"
-        >
-          <div>
+          <q-input
+            label="Nom"
+            lazy-rules
+            :rules="[
+              (val) =>
+                (val && val.length > 0) || 'Veuillez saisir un nom valide',
+            ]"
+            v-model="client.nomClient"
+          />
+          <div
+            v-if="selected.length"
+            class="fit row no-wrap justify-between items-center content-start"
+          >
+            <div>
+              <q-btn
+                :loading="loading[1]"
+                icon="cloud_upload"
+                type="submit"
+                color="positive"
+                label="Modifier"
+              >
+                <template v-slot:loading>
+                  <q-spinner-dots class="on-left" />
+                  MODIFIER
+                </template>
+              </q-btn>
+            </div>
+            <div>
+              <q-btn round color="negative" icon="delete" @click="onDelete" />
+            </div>
+          </div>
+        </q-form>
+        <q-form v-if="selected.length" class="q-mt-lg">
+          <div class="text-h5">Liste des produits commandés</div>
+          <div
+            class="full-width no-wrap row justify-between items-start content-start"
+          >
+            <q-input type="date" class="col q-mr-md" v-model="date.dateA" />
+            <q-input type="date" class="col q-ml-md" v-model="date.dateB" />
+          </div>
+          <div class="q-mt-lg" align="right">
             <q-btn
-              :loading="loading[1]"
-              icon="cloud_upload"
-              type="submit"
-              color="positive"
-              label="Modifier"
+              :loading="loading[2]"
+              icon="search"
+              color="primary"
+              label="Consulter"
+              @click="onSubmitDates"
             >
               <template v-slot:loading>
                 <q-spinner-dots class="on-left" />
-                MODIFIER
+                CONSULTER
               </template>
             </q-btn>
           </div>
-          <div>
-            <q-btn round color="negative" icon="delete" @click="onDelete" />
-          </div>
-        </div>
-      </q-form>
-      <q-form v-if="selected.length" class="q-mt-lg">
-        <div class="text-h5">Liste des produits commandés</div>
-        <div
-          class="full-width no-wrap row justify-between items-start content-start"
-        >
-          <q-input type="date" class="col q-mr-md" />
-          <q-input type="date" class="col q-ml-md" />
-        </div>
-        <div class="q-mt-lg" align="right">
-          <q-btn
-            label="Consulter"
-            icon="search"
-            type="submit"
-            color="primary"
-          />
-        </div>
-      </q-form>
+        </q-form>
+      </div>
+      <div class="q-mt-lg">
+        <q-table
+          :rows="rowsClient"
+          :columns="columnsClient"
+          row-key="numClient"
+          flat
+          color="accent"
+          :filter="filter"
+          separator="none"
+          bordered
+          v-model:selected="selected"
+          v-model:pagination="paginationAll"
+          hide-bottom
+        />
+      </div>
     </div>
   </q-page>
 </template>
@@ -113,7 +139,7 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { useQuasar } from "quasar";
-import { getAllClients, updateClient, deleteClient } from "src/api/client";
+import { getAllClients, updateClient, deleteClient, getChiffreAffairesClient } from "src/api/client";
 
 export default defineComponent({
   name: "PageClient",
@@ -123,9 +149,16 @@ export default defineComponent({
         rowsPerPage: 12,
         label: "Nombre de client par page",
       },
+      paginationAll: {
+        rowsPerPage: 0,
+      },
       client: {
         numClient: "",
         nomClient: "",
+      },
+      date: {
+        dateA: "",
+        dateB: "",
       },
     };
   },
@@ -136,6 +169,15 @@ export default defineComponent({
       const obj = JSON.parse(JSON.stringify(this.selected[0].rows[0]));
       this.client.numClient = obj.numClient;
       this.client.nomClient = obj.nomClient;
+
+      var today = new Date();
+      var dd = String(today.getDate()).padStart(2, "0");
+      var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+      var yyyy = today.getFullYear();
+      today = yyyy + "-" + mm + "-" + dd;
+      var lastYear = yyyy-1 + "-" + mm + "-" + dd;
+      this.date.dateA = lastYear;
+      this.date.dateB = today;
     },
     onSubmit() {
       this.simulateProgress(1);
@@ -156,6 +198,28 @@ export default defineComponent({
               .catch((error) => {
                 console.log(error);
               });
+          })
+          .catch((error) => {
+            console.log(error);
+            this.toast.notify({
+              type: "negative",
+              textColor: "White",
+              icon: "warning",
+              message:
+                "Erreur lors de la mise à jour des informations du client",
+              position: "bottom-right",
+            });
+          });
+      }, 1500);
+    },
+    onSubmitDates() {
+      this.simulateProgress(2);
+      console.table(this.date);
+      this.timer = setTimeout(() => {
+        getChiffreAffairesClient(this.client.numClient, this.date)
+          .then((result) => {
+            this.rowsClient = result.data;
+            console.log(result.data);
           })
           .catch((error) => {
             console.log(error);
@@ -250,7 +314,25 @@ export default defineComponent({
       },
     ];
 
+    const columnsClient = [
+      {
+        name: "designProduit",
+        required: true,
+        label: "Designation Produit",
+        align: "left",
+        field: (row) => row.designProduit,
+        sortable: true,
+      },
+      {
+        name: "dateCommande",
+        label: "Nom",
+        field: "dateCommande",
+        align: "right",
+      },
+    ];
+
     const rows = ref([]);
+    const rowsClient = ref([]);
 
     getAllClients()
       .then((result) => {
@@ -265,7 +347,9 @@ export default defineComponent({
       selected: ref([]),
       filter: ref(""),
       columns,
+      columnsClient,
       rows,
+      rowsClient,
       progress,
       simulateProgress,
       loading,

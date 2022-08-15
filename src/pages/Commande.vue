@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="full-width column">
-    <div v-if="selected.length" class="q-pa-lg bg-dark shadow-6">
+    <div v-if="selected.length" class="q-pa-lg bg-dark shadow-6 rounded-borders">
       <!-- <q-form @submit.prevent="onSubmit" @reset="onReset"> -->
       <q-form>
         <div v-if="selected.length" class="text-h5">
@@ -67,15 +67,20 @@
         </div>
         <q-input
           label="Prix Unitaire"
+          suffix="Ar"
           type="text"
           v-model="commande.puProduit"
           readonly
           borderless
         />
+
         <div
-          class="fit row no-wrap justify-between items-center content-start q-mt-lg"
+          class="fit row no-wrap justify-between items-baseline content-start q-mt-lg"
         >
-          <div class="row no-wrap">
+          <div class="text-h5 shadow-5 q-pa-sm rounded-borders">
+            Total : {{ commande.total }} Ar
+          </div>
+          <!-- <div class="row no-wrap">
             <div>
               <q-btn
                 label="Facture"
@@ -85,28 +90,28 @@
               />
             </div>
             <div>
-            <q-btn
-              :loading="loading[1]"
-              icon="cloud_upload"
-              type="submit"
-              color="positive"
-              label="Modifier"
-              class="q-ml-md"
-            >
-              <template v-slot:loading>
-                <q-spinner-dots class="on-left" />
-                MODIFIER
-              </template>
-            </q-btn>
-          </div>
-          </div>
+              <q-btn
+                :loading="loading[1]"
+                icon="cloud_upload"
+                type="submit"
+                color="positive"
+                label="Modifier"
+                class="q-ml-md"
+              >
+                <template v-slot:loading>
+                  <q-spinner-dots class="on-left" />
+                  MODIFIER
+                </template>
+              </q-btn>
+            </div>
+          </div> -->
           <div>
             <q-btn round color="negative" icon="delete" @click="onDelete" />
           </div>
         </div>
       </q-form>
     </div>
-    <div v-else class="text-h5 q-pa-lg bg-dark shadow-6">
+    <div v-else class="text-h5 q-pa-lg bg-dark shadow-6 rounded-borders">
       Aucune commande selectionnée
     </div>
 
@@ -163,99 +168,6 @@ import {
   deleteCommande,
 } from "src/api/commande";
 
-// const rows = [
-//   {
-//     idCommande: 159,
-//     date: "22/12/2022",
-//     idClient: 159,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 159,
-//     designProduit: "Frozen Yogurt",
-//     quantite: 33,
-//     montant: 646,
-//   },
-//   {
-//     idCommande: 237,
-//     date: "22/12/2022",
-//     idClient: 237,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 237,
-//     designProduit: "Ice cream sandwich",
-//     quantite: 1214,
-//     montant: 543,
-//   },
-//   {
-//     idCommande: 262,
-//     date: "22/12/2022",
-//     idClient: 262,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 262,
-//     designProduit: "Eclair",
-//     quantite: 464,
-//     montant: 76,
-//   },
-//   {
-//     idCommande: 305,
-//     date: "22/12/2022",
-//     idClient: 305,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 305,
-//     designProduit: "Cupcake",
-//     quantite: 7978,
-//     montant: 668,
-//   },
-//   {
-//     idCommande: 356,
-//     date: "22/12/2022",
-//     idClient: 356,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 356,
-//     designProduit: "Gingerbread",
-//     quantite: 686,
-//     montant: 123,
-//   },
-//   {
-//     idCommande: 375,
-//     date: "22/12/2022",
-//     idClient: 375,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 375,
-//     designProduit: "Jelly bean",
-//     quantite: 5858,
-//     montant: 68,
-//   },
-//   {
-//     idCommande: 392,
-//     date: "22/12/2022",
-//     idClient: 392,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 392,
-//     designProduit: "Lollipop",
-//     quantite: 6886,
-//     montant: 6886,
-//   },
-//   {
-//     idCommande: 408,
-//     date: "22/12/2022",
-//     idClient: 408,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 408,
-//     designProduit: "Honeycomb",
-//     quantite: 90,
-//     montant: 464,
-//   },
-//   {
-//     idCommande: 452,
-//     date: "22/12/2022",
-//     idClient: 452,
-//     nomClient: "Nom et Prénom",
-//     idProduit: 452,
-//     designProduit: "Donut",
-//     quantite: 786,
-//     montant: 688,
-//   },
-// ];
-
 export default defineComponent({
   name: "PageProduit",
   data() {
@@ -273,6 +185,7 @@ export default defineComponent({
         designProduit: "",
         puProduit: "",
         qte: "",
+        total: "",
       },
     };
   },
@@ -362,8 +275,9 @@ export default defineComponent({
       this.commande.nomClient = obj.nomClient;
       this.commande.numProduit = obj.numProduit;
       this.commande.designProduit = obj.designProduit;
-      this.commande.qte = obj.qte;
       this.commande.puProduit = obj.puProduit;
+      this.commande.qte = obj.qte;
+      this.commande.total = obj.total;
     },
     onDelete() {
       this.toast
@@ -371,7 +285,8 @@ export default defineComponent({
           dark: true,
           title: "Confirmer la suppression",
           message:
-            "Voulez-vous supprimer cette commande ? " + this.commande.numCommande,
+            "Voulez-vous supprimer cette commande ? " +
+            this.commande.numCommande,
           cancel: true,
           ok: "Supprimer",
           cancel: "Annuler",
@@ -379,7 +294,11 @@ export default defineComponent({
           transitionHide: "fade",
         })
         .onOk(() => {
-          deleteCommande(this.commande.numCommande, this.commande.numProduit, this.commande.qte)
+          deleteCommande(
+            this.commande.numCommande,
+            this.commande.numProduit,
+            this.commande.qte
+          )
             .then(() => {
               this.editing = false;
               this.toast.notify({

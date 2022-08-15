@@ -1,6 +1,6 @@
 <template>
   <div
-    class="text-h5 text-accent q-mb-sm full-width row no-wrap justify-between items-start content-start"
+    class="text-h5 text-accent q-mb-sm full-width row no-wrap justify-between items-center content-start"
   >
     <div>Commande</div>
     <q-icon name="local_mall" />
@@ -34,7 +34,10 @@
       style="width: 750px; max-width: 80vw"
     >
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h5">Ajouter une nouvelle commande</div>
+        <div class="text-h5 row no-wrap items-center text-accent">
+          <q-icon name="local_mall" />
+          <div class="q-ml-sm">Ajouter une nouvelle commande</div>
+        </div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
@@ -99,6 +102,7 @@
               label="Prix Unitaire"
               type="number"
               v-model="produit.puProduit"
+              suffix="Ar"
               readonly
               borderless
               class="col q-mr-md"
@@ -120,7 +124,7 @@
             />
             <q-input
               label="Montant"
-              prefix="Ar"
+              suffix="Ar"
               type="number"
               v-model="produit.montant"
               readonly
@@ -234,9 +238,14 @@ export default {
     },
 
     onReset() {
+      this.client.numClient = "";
+      this.client.nomClient = "";
+      this.produit.numProduit = "";
       this.produit.designProduit = "";
       this.produit.puProduit = "";
       this.produit.stockProduit = "";
+      this.produit.qte = "";
+      this.produit.montant = "";
     },
 
     selectClient() {

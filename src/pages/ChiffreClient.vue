@@ -7,7 +7,7 @@
       title="Chiffre d'affaire des clients"
       :rows="rows"
       :columns="columns"
-      row-key="idClient"
+      row-key="numClient"
       flat
       color="accent"
       separator="none"
@@ -46,61 +46,8 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
+import { getChiffreAffaires } from "src/api/client";
 
-const rows = [
-  {
-    idClient: 159,
-    nomClient: "Frozen Yogurt",
-  },
-  {
-    idClient: 237,
-    nomClient: "Ice cream sandwich",
-  },
-  {
-    idClient: 262,
-    nomClient: "Eclair",
-  },
-  {
-    idClient: 305,
-    nomClient: "Cupcake",
-  },
-  {
-    idClient: 356,
-    nomClient: "Gingerbread",
-  },
-  {
-    idClient: 375,
-    nomClient: "Jelly bean",
-  },
-  {
-    idClient: 392,
-    nomClient: "Lollipop",
-  },
-  {
-    idClient: 408,
-    nomClient: "Honeycomb",
-  },
-  {
-    idClient: 452,
-    nomClient: "Donut",
-  },
-  {
-    idClient: 408,
-    nomClient: "Honeycomb",
-  },
-  {
-    idClient: 452,
-    nomClient: "Donut",
-  },
-  {
-    idClient: 408,
-    nomClient: "Honeycomb",
-  },
-  {
-    idClient: 452,
-    nomClient: "Donut",
-  },
-];
 
 export default defineComponent({
   name: "ChiffreClient",
@@ -115,11 +62,11 @@ export default defineComponent({
   setup() {
     const columns = [
       {
-        name: "idClient",
+        name: "numClient",
         required: true,
         label: "ID",
         align: "left",
-        field: (row) => row.idClient,
+        field: (row) => row.numClient,
         sortable: true,
       },
       {
@@ -129,17 +76,24 @@ export default defineComponent({
         align: "left",
         sortable: true,
       },
+      {
+        name: "total",
+        label: "Total (Ar)",
+        field: "total",
+        align: "right",
+        sortable: true,
+      },
     ];
 
-    // const rows = ref([]);
+    const rows = ref([]);
 
-    // getAllProduits()
-    //   .then((result) => {
-    //     rows.value = result.data;
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
+    getChiffreAffaires()
+      .then((result) => {
+        rows.value = result.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
     return {
       selected: ref([]),

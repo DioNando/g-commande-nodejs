@@ -1,6 +1,6 @@
 <template>
   <div
-    class="text-h5 text-positive q-mb-sm full-width row no-wrap justify-between items-start content-start"
+    class="text-h5 text-positive q-mb-sm full-width row no-wrap justify-between items-center content-start"
   >
     <div>Produit</div>
     <q-icon name="inventory_2" />
@@ -44,7 +44,10 @@
       style="width: 500px; max-width: 80vw"
     >
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h5">Ajouter un nouveau produit</div>
+        <div class="text-h5 row no-wrap items-center text-positive">
+          <q-icon name="inventory_2" />
+          <div class="q-ml-sm">Ajouter un nouveau produit</div>
+        </div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
@@ -64,6 +67,7 @@
           >
             <q-input
               label="Prix Unitaire"
+              suffix="Ar"
               type="number"
               v-model="produit.puProduit"
               lazy-rules

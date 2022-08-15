@@ -44,7 +44,7 @@
       </template>
     </q-table>
 
-    <div class="q-pa-lg bg-dark shadow-6 q-ml-md" style="width: 25rem">
+    <div class="q-pa-lg bg-dark shadow-6 q-ml-md rounded-borders" style="width: 25rem">
       <q-form @submit.prevent="onSubmit">
         <div v-if="selected.length" class="text-h5">
           Informations sur le produit
@@ -67,10 +67,11 @@
           v-model="produit.designProduit"
         />
         <q-input
-          label="Prix Unitaire"
+          label="Prix Unitaire (Ar)"
           type="number"
           lazy-rules
           v-model="produit.puProduit"
+          suffix="Ar"
         />
         <q-input
           label="Stock"
@@ -160,7 +161,7 @@ export default defineComponent({
       },
       {
         name: "puProduit",
-        label: "Prix Unitaire",
+        label: "Prix Unitaire (Ar)",
         field: "puProduit",
         align: "right",
         sortable: true,
