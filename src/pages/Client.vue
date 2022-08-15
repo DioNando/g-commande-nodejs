@@ -217,7 +217,6 @@ export default defineComponent({
         });
     },
   },
-  mounted() {},
   setup() {
     const loading = ref([false]);
 

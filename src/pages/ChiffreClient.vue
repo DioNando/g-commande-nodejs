@@ -15,15 +15,19 @@
       v-model:selected="selected"
       class="col q-mr-md"
       hide-selected-banner
+      v-model:pagination="pagination"
+      :rows-per-page-options="[4, 8, 12, 24, 0]"
+      :rows-per-page-label="pagination.label"
     >
       <template v-slot:top-right>
         <q-input
           borderless
           debounce="300"
-          type="date"
+          label="Recherche"
+          v-model="filter"
         >
           <template v-slot:prepend>
-            <q-icon name="calendar_month" />
+            <q-icon name="search" />
           </template>
         </q-input>
       </template>
@@ -42,24 +46,6 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
-
-const columns = [
-  {
-    name: "idClient",
-    required: true,
-    label: "ID",
-    align: "left",
-    field: (row) => row.idClient,
-    sortable: true,
-  },
-  {
-    name: "nomClient",
-    label: "Nom",
-    field: "nomClient",
-    align: "left",
-    sortable: true,
-  },
-];
 
 const rows = [
   {
@@ -98,19 +84,63 @@ const rows = [
     idClient: 452,
     nomClient: "Donut",
   },
+  {
+    idClient: 408,
+    nomClient: "Honeycomb",
+  },
+  {
+    idClient: 452,
+    nomClient: "Donut",
+  },
+  {
+    idClient: 408,
+    nomClient: "Honeycomb",
+  },
+  {
+    idClient: 452,
+    nomClient: "Donut",
+  },
 ];
 
 export default defineComponent({
   name: "ChiffreClient",
   data() {
     return {
-      client: {
-        id: "",
-        nom: "",
+      pagination: {
+        rowsPerPage: 10,
+        label: "Nombre de client par page",
       },
     };
   },
   setup() {
+    const columns = [
+      {
+        name: "idClient",
+        required: true,
+        label: "ID",
+        align: "left",
+        field: (row) => row.idClient,
+        sortable: true,
+      },
+      {
+        name: "nomClient",
+        label: "Nom",
+        field: "nomClient",
+        align: "left",
+        sortable: true,
+      },
+    ];
+
+    // const rows = ref([]);
+
+    // getAllProduits()
+    //   .then((result) => {
+    //     rows.value = result.data;
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+
     return {
       selected: ref([]),
       filter: ref(""),

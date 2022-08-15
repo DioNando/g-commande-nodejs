@@ -17,6 +17,10 @@
       v-model:selected="selected"
       class="col q-mr-md"
       hide-selected-banner
+      @selection="onRowClick"
+      v-model:pagination="pagination"
+      :rows-per-page-options="[4, 8, 12, 24, 0]"
+      :rows-per-page-label="pagination.label"
     >
       <template v-slot:top-right>
         <q-input
@@ -41,8 +45,7 @@
     </q-table>
 
     <div class="q-pa-lg bg-dark shadow-6 q-ml-md" style="width: 25rem">
-      <!-- <q-form @submit.prevent="onSubmit" @reset="onReset"> -->
-      <q-form>
+      <q-form @submit.prevent="onSubmit">
         <div v-if="selected.length" class="text-h5">
           Informations sur le produit
         </div>
@@ -51,7 +54,7 @@
           label="Identification du produit"
           readonly
           borderless
-          v-model="produit.id"
+          v-model="produit.numProduit"
         />
 
         <q-input
@@ -61,23 +64,19 @@
             (val) =>
               (val && val.length > 0) || 'Veuillez saisir un produit valide',
           ]"
-          v-model="selected[0]"
+          v-model="produit.designProduit"
         />
         <q-input
           label="Prix Unitaire"
           type="number"
           lazy-rules
-          :rules="[
-            (val) =>
-              (val && val.length > 0) || 'Le prix doit être superieur à zero',
-          ]"
-          v-model="produit.prixUni"
+          v-model="produit.puProduit"
         />
         <q-input
           label="Stock"
           type="number"
           lazy-rules
-          v-model="produit.stock"
+          v-model="produit.stockProduit"
         />
         <div
           v-if="selected.length"
@@ -85,18 +84,23 @@
         >
           <div>
             <q-btn
-              label="Modifier"
+              :loading="loading[1]"
               icon="cloud_upload"
               type="submit"
               color="positive"
-            />
+              label="Modifier"
+            >
+              <template v-slot:loading>
+                <q-spinner-dots class="on-left" />
+                MODIFIER
+              </template>
+            </q-btn>
           </div>
           <div>
-            <q-btn round color="negative" type="submit" icon="delete" />
+            <q-btn round color="negative" icon="delete" @click="onDelete" />
           </div>
         </div>
       </q-form>
-      <div class="q-mt-md" v-if="selected.length">Produit : {{ selected[0].designProduit }}</div>
     </div>
   </q-page>
 </template>
@@ -104,21 +108,40 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
-import { getAllProduits } from "src/api/produit";
+import { useQuasar } from "quasar";
+import { getAllProduits, updateProduit, deleteProduit } from "src/api/produit";
 
 export default defineComponent({
   name: "PageProduit",
   data() {
     return {
+      pagination: {
+        rowsPerPage: 8,
+        label: "Nombre de produit par page",
+      },
       produit: {
-        id: "",
-        designation: "",
-        prixUni: "",
-        stock: "",
+        numProduit: "",
+        designProduit: "",
+        puProduit: "",
+        stockProduit: "",
       },
     };
   },
   setup() {
+    const loading = ref([false]);
+
+    const progress = ref(false);
+    let timer = null;
+
+    function simulateProgress(number) {
+      loading.value[number] = true;
+      setTimeout(() => {
+        loading.value[number] = false;
+      }, 1500);
+    }
+
+    const toast = useQuasar();
+
     const columns = [
       {
         name: "numProduit",
@@ -161,11 +184,106 @@ export default defineComponent({
       });
 
     return {
+      toast,
       selected: ref([]),
       filter: ref(""),
       columns,
       rows,
+      progress,
+      simulateProgress,
+      loading,
+      timer,
     };
+  },
+  methods: {
+    onRowClick(row) {
+      this.selected = [];
+      this.selected.push(row);
+      const obj = JSON.parse(JSON.stringify(this.selected[0].rows[0]));
+      this.produit.numProduit = obj.numProduit;
+      this.produit.designProduit = obj.designProduit;
+      this.produit.puProduit = obj.puProduit;
+      this.produit.stockProduit = obj.stockProduit;
+    },
+    onSubmit() {
+      this.simulateProgress(1);
+      this.timer = setTimeout(() => {
+        updateProduit(this.produit.numProduit, this.produit)
+          .then(() => {
+            this.editing = false;
+            this.toast.notify({
+              type: "positive",
+              message: "Le produit a bien été modifié",
+              icon: "edit_note",
+              position: "bottom-right",
+            });
+            getAllProduits()
+              .then((result) => {
+                this.rows = result.data;
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+            this.toast.notify({
+              type: "negative",
+              textColor: "White",
+              icon: "warning",
+              message:
+                "Erreur lors de la mise à jour des informations du produit",
+              position: "bottom-right",
+            });
+          });
+      }, 1500);
+    },
+    onDelete() {
+      this.toast
+        .dialog({
+          dark: true,
+          title: "Confirmer la suppression",
+          message: "Voulez-vous supprimer le client : " + this.produit.designProduit,
+          cancel: true,
+          ok: "Supprimer",
+          cancel: "Annuler",
+          persistent: true,
+          transitionHide: "fade",
+        })
+        .onOk(() => {
+          deleteProduit(this.produit.numProduit)
+            .then(() => {
+              this.editing = false;
+              this.toast.notify({
+                type: "warning",
+                message: "Le produit a bien été supprimé",
+                icon: "edit_note",
+                position: "bottom-right",
+              });
+              // const index = this.rows
+              //   .map((object) => object.numClient)
+              //   .indexOf(this.client.numClient);
+              // this.rows.splice(index, 1);
+              getAllProduits()
+                .then((result) => {
+                  this.rows = result.data;
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            })
+            .catch((error) => {
+              console.log(error);
+              this.toast.notify({
+                type: "negative",
+                textColor: "White",
+                icon: "warning",
+                message: "Erreur lors de la suppression du produit",
+                position: "bottom-right",
+              });
+            });
+        });
+    },
   },
 });
 </script>

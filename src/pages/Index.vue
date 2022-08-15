@@ -5,6 +5,7 @@
       src="~assets/creativity-pana.svg"
       style="width: 100%; height: 25rem"
     >
+    <div class="text-h2 text-primary bg-dark q-pa-lg rounded-borders	shadow-5">Gestion des commandes</div>
   </q-page>
 </template>
 

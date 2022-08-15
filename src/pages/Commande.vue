@@ -14,14 +14,14 @@
             label="Identification de la commande"
             readonly
             borderless
-            v-model="commande.id"
+            v-model="commande.numCommande"
             class="col q-mr-md"
           />
 
           <q-input
             label="Date"
             type="date"
-            v-model="commande.date"
+            v-model="commande.dateCommande"
             class="col q-ml-md"
           />
         </div>
@@ -31,7 +31,7 @@
           <q-input
             label="ID Client"
             type="text"
-            v-model="commande.idClient"
+            v-model="commande.numClient"
             class="col q-mr-md"
             borderless
           />
@@ -48,7 +48,7 @@
           <q-input
             label="ID Produit"
             type="text"
-            v-model="commande.idProduit"
+            v-model="commande.numProduit"
             class="col q-mr-md"
             borderless
           />
@@ -58,12 +58,17 @@
             v-model="commande.designProduit"
             class="col q-mx-md"
           />
-          <q-input label="Quantité" type="number" v-model="commande.quantite" class="col q-ml-md" />
+          <q-input
+            label="Quantité"
+            type="number"
+            v-model="commande.qte"
+            class="col q-ml-md"
+          />
         </div>
         <q-input
-          label="Montant"
+          label="Prix Unitaire"
           type="text"
-          v-model="commande.montant"
+          v-model="commande.puProduit"
           readonly
           borderless
         />
@@ -79,21 +84,27 @@
                 color="primary"
               />
             </div>
-            <div class="q-ml-lg">
-              <q-btn
-                label="Modifier"
-                icon="cloud_upload"
-                type="submit"
-                color="positive"
-              />
-            </div>
+            <div>
+            <q-btn
+              :loading="loading[1]"
+              icon="cloud_upload"
+              type="submit"
+              color="positive"
+              label="Modifier"
+              class="q-ml-md"
+            >
+              <template v-slot:loading>
+                <q-spinner-dots class="on-left" />
+                MODIFIER
+              </template>
+            </q-btn>
+          </div>
           </div>
           <div>
-            <q-btn round color="negative" type="submit" icon="delete" />
+            <q-btn round color="negative" icon="delete" @click="onDelete" />
           </div>
         </div>
       </q-form>
-      <div class="q-mt-md">Commande : {{ selected }}</div>
     </div>
     <div v-else class="text-h5 q-pa-lg bg-dark shadow-6">
       Aucune commande selectionnée
@@ -103,7 +114,7 @@
       title="Liste des commandes"
       :rows="rows"
       :columns="columns"
-      row-key="idCommande"
+      row-key="numCommande"
       flat
       color="accent"
       :filter="filter"
@@ -111,8 +122,12 @@
       bordered
       selection="single"
       v-model:selected="selected"
-      hide-selected-banner
       class="q-mt-lg"
+      hide-selected-banner
+      @selection="onRowClick"
+      v-model:pagination="pagination"
+      :rows-per-page-options="[4, 8, 12, 24, 0]"
+      :rows-per-page-label="pagination.label"
     >
       <template v-slot:top-right>
         <q-input
@@ -141,167 +156,262 @@
 <script>
 import { defineComponent } from "vue";
 import { ref } from "vue";
+import { useQuasar } from "quasar";
+import {
+  getAllCommandes,
+  updateCommande,
+  deleteCommande,
+} from "src/api/commande";
 
-const columns = [
-  {
-    name: "idCommande",
-    required: true,
-    label: "ID",
-    align: "left",
-    field: (row) => row.idCommande,
-    sortable: true,
-  },
-  {
-    name: "date",
-    label: "Date",
-    field: "date",
-    align: "right",
-    sortable: true,
-  },
-  {
-    name: "nomClient",
-    label: "Client",
-    field: "nomClient",
-    align: "left",
-    sortable: true,
-  },
-  {
-    name: "designProduit",
-    label: "Designation Produit",
-    field: "designProduit",
-    align: "left",
-    sortable: true,
-  },
-  {
-    name: "quantite",
-    label: "Quantité",
-    field: "quantite",
-    align: "right",
-  },
-  {
-    name: "montant",
-    label: "Montant",
-    field: "montant",
-    align: "right",
-  },
-];
-
-const rows = [
-  {
-    idCommande: 159,
-    date: "22/12/2022",
-    idClient: 159,
-    nomClient: "Nom et Prénom",
-    idProduit: 159,
-    designProduit: "Frozen Yogurt",
-    quantite: 33,
-    montant: 646,
-  },
-  {
-    idCommande: 237,
-    date: "22/12/2022",
-    idClient: 237,
-    nomClient: "Nom et Prénom",
-    idProduit: 237,
-    designProduit: "Ice cream sandwich",
-    quantite: 1214,
-    montant: 543,
-  },
-  {
-    idCommande: 262,
-    date: "22/12/2022",
-    idClient: 262,
-    nomClient: "Nom et Prénom",
-    idProduit: 262,
-    designProduit: "Eclair",
-    quantite: 464,
-    montant: 76,
-  },
-  {
-    idCommande: 305,
-    date: "22/12/2022",
-    idClient: 305,
-    nomClient: "Nom et Prénom",
-    idProduit: 305,
-    designProduit: "Cupcake",
-    quantite: 7978,
-    montant: 668,
-  },
-  {
-    idCommande: 356,
-    date: "22/12/2022",
-    idClient: 356,
-    nomClient: "Nom et Prénom",
-    idProduit: 356,
-    designProduit: "Gingerbread",
-    quantite: 686,
-    montant: 123,
-  },
-  {
-    idCommande: 375,
-    date: "22/12/2022",
-    idClient: 375,
-    nomClient: "Nom et Prénom",
-    idProduit: 375,
-    designProduit: "Jelly bean",
-    quantite: 5858,
-    montant: 68,
-  },
-  {
-    idCommande: 392,
-    date: "22/12/2022",
-    idClient: 392,
-    nomClient: "Nom et Prénom",
-    idProduit: 392,
-    designProduit: "Lollipop",
-    quantite: 6886,
-    montant: 6886,
-  },
-  {
-    idCommande: 408,
-    date: "22/12/2022",
-    idClient: 408,
-    nomClient: "Nom et Prénom",
-    idProduit: 408,
-    designProduit: "Honeycomb",
-    quantite: 90,
-    montant: 464,
-  },
-  {
-    idCommande: 452,
-    date: "22/12/2022",
-    idClient: 452,
-    nomClient: "Nom et Prénom",
-    idProduit: 452,
-    designProduit: "Donut",
-    quantite: 786,
-    montant: 688,
-  },
-];
+// const rows = [
+//   {
+//     idCommande: 159,
+//     date: "22/12/2022",
+//     idClient: 159,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 159,
+//     designProduit: "Frozen Yogurt",
+//     quantite: 33,
+//     montant: 646,
+//   },
+//   {
+//     idCommande: 237,
+//     date: "22/12/2022",
+//     idClient: 237,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 237,
+//     designProduit: "Ice cream sandwich",
+//     quantite: 1214,
+//     montant: 543,
+//   },
+//   {
+//     idCommande: 262,
+//     date: "22/12/2022",
+//     idClient: 262,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 262,
+//     designProduit: "Eclair",
+//     quantite: 464,
+//     montant: 76,
+//   },
+//   {
+//     idCommande: 305,
+//     date: "22/12/2022",
+//     idClient: 305,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 305,
+//     designProduit: "Cupcake",
+//     quantite: 7978,
+//     montant: 668,
+//   },
+//   {
+//     idCommande: 356,
+//     date: "22/12/2022",
+//     idClient: 356,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 356,
+//     designProduit: "Gingerbread",
+//     quantite: 686,
+//     montant: 123,
+//   },
+//   {
+//     idCommande: 375,
+//     date: "22/12/2022",
+//     idClient: 375,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 375,
+//     designProduit: "Jelly bean",
+//     quantite: 5858,
+//     montant: 68,
+//   },
+//   {
+//     idCommande: 392,
+//     date: "22/12/2022",
+//     idClient: 392,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 392,
+//     designProduit: "Lollipop",
+//     quantite: 6886,
+//     montant: 6886,
+//   },
+//   {
+//     idCommande: 408,
+//     date: "22/12/2022",
+//     idClient: 408,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 408,
+//     designProduit: "Honeycomb",
+//     quantite: 90,
+//     montant: 464,
+//   },
+//   {
+//     idCommande: 452,
+//     date: "22/12/2022",
+//     idClient: 452,
+//     nomClient: "Nom et Prénom",
+//     idProduit: 452,
+//     designProduit: "Donut",
+//     quantite: 786,
+//     montant: 688,
+//   },
+// ];
 
 export default defineComponent({
   name: "PageProduit",
   data() {
     return {
+      pagination: {
+        rowsPerPage: 7,
+        label: "Nombre de commande par page",
+      },
       commande: {
-        id: "",
-        date: "2022-08-13",
-        idClient: "",
+        numCommande: "",
+        dateCommande: "",
+        numClient: "",
         nomClient: "",
-        idProduit: "",
+        numProduit: "",
         designProduit: "",
-        quantite: "",
-        montant: "",
+        puProduit: "",
+        qte: "",
       },
     };
   },
   setup() {
+    const loading = ref([false]);
+
+    const progress = ref(false);
+    let timer = null;
+
+    function simulateProgress(number) {
+      loading.value[number] = true;
+      setTimeout(() => {
+        loading.value[number] = false;
+      }, 1500);
+    }
+
+    const toast = useQuasar();
+
+    const columns = [
+      {
+        name: "numCommande",
+        required: true,
+        label: "ID",
+        align: "left",
+        field: (row) => row.numCommande,
+        sortable: true,
+      },
+      {
+        name: "dateCommande",
+        label: "Date",
+        field: "dateCommande",
+        align: "right",
+        sortable: true,
+      },
+      {
+        name: "nomClient",
+        label: "Client",
+        field: "nomClient",
+        align: "left",
+        sortable: true,
+      },
+      {
+        name: "designProduit",
+        label: "Designation Produit",
+        field: "designProduit",
+        align: "left",
+        sortable: true,
+      },
+      {
+        name: "qte",
+        label: "Quantité",
+        field: "qte",
+        align: "right",
+      },
+    ];
+
+    const rows = ref([]);
+
+    getAllCommandes()
+      .then((result) => {
+        rows.value = result.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
     return {
+      toast,
       selected: ref([]),
       filter: ref(""),
       columns,
       rows,
+      progress,
+      simulateProgress,
+      loading,
+      timer,
     };
+  },
+  methods: {
+    onRowClick(row) {
+      this.selected = [];
+      this.selected.push(row);
+      const obj = JSON.parse(JSON.stringify(this.selected[0].rows[0]));
+      this.commande.numCommande = obj.numCommande;
+      this.commande.dateCommande = obj.dateCommande;
+      this.commande.numClient = obj.numClient;
+      this.commande.nomClient = obj.nomClient;
+      this.commande.numProduit = obj.numProduit;
+      this.commande.designProduit = obj.designProduit;
+      this.commande.qte = obj.qte;
+      this.commande.puProduit = obj.puProduit;
+    },
+    onDelete() {
+      this.toast
+        .dialog({
+          dark: true,
+          title: "Confirmer la suppression",
+          message:
+            "Voulez-vous supprimer cette commande ? " + this.commande.numCommande,
+          cancel: true,
+          ok: "Supprimer",
+          cancel: "Annuler",
+          persistent: true,
+          transitionHide: "fade",
+        })
+        .onOk(() => {
+          deleteCommande(this.commande.numCommande, this.commande.numProduit, this.commande.qte)
+            .then(() => {
+              this.editing = false;
+              this.toast.notify({
+                type: "warning",
+                message: "Le commande a bien été supprimé",
+                icon: "edit_note",
+                position: "bottom-right",
+              });
+              // const index = this.rows
+              //   .map((object) => object.numClient)
+              //   .indexOf(this.client.numClient);
+              // this.rows.splice(index, 1);
+              getAllCommandes()
+                .then((result) => {
+                  this.rows = result.data;
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            })
+            .catch((error) => {
+              console.log(error);
+              this.toast.notify({
+                type: "negative",
+                textColor: "White",
+                icon: "warning",
+                message: "Erreur lors de la suppression de la commande",
+                position: "bottom-right",
+              });
+            });
+        });
+    },
   },
 });
 </script>

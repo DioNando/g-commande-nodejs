@@ -1,4 +1,10 @@
 <template>
+  <div
+    class="text-h5 text-info q-mb-sm full-width row no-wrap justify-between items-start content-start"
+  >
+    <div>Client</div>
+    <q-icon name="face" />
+  </div>
   <q-card flat bordered class="my-card">
     <q-card-section>
       <div class="text-h6">Ajout d'un nouveau client</div>
@@ -19,7 +25,7 @@
       <q-btn flat @click="router.push(`/client`)">Liste</q-btn>
     </q-card-actions>
   </q-card>
-  <q-card flat bordered class="my-card q-my-lg">
+  <q-card flat bordered class="my-card q-mt-lg">
     <q-card-section>
       <div class="text-h6">Chiffre d'affaires des clients</div>
     </q-card-section>
@@ -41,7 +47,7 @@
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
       <q-card-section>
-        <q-form @submit.prevent="onSubmit" @reset="onReset">
+        <q-form @submit="onSubmit" @reset="onReset">
           <q-input
             label="Nom"
             lazy-rules
@@ -76,7 +82,7 @@
 import { useQuasar, QSpinnerDots } from "quasar";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { addClient, getAllClients } from "src/api/client";
+import { addClient } from "src/api/client";
 
 export default {
   name: "NavClient",
@@ -110,7 +116,7 @@ export default {
         this.$q.loading.hide();
         addClient(this.client)
           .then(() => {
-            this.router.push(`/client`);
+            // this.router.push(`/client`);
             this.toast.notify({
               color: "positive",
               textColor: "white",

@@ -1,4 +1,10 @@
 <template>
+  <div
+    class="text-h5 text-positive q-mb-sm full-width row no-wrap justify-between items-start content-start"
+  >
+    <div>Produit</div>
+    <q-icon name="inventory_2" />
+  </div>
   <q-card flat bordered class="my-card">
     <q-card-section>
       <div class="text-h6">Ajout d'un nouveau produit</div>
@@ -10,7 +16,7 @@
       <q-btn flat @click="modal = true">Nouveau</q-btn>
     </q-card-actions>
   </q-card>
-  <q-card dark bordered flat class="my-card q-my-lg">
+  <q-card dark bordered flat class="my-card q-mt-lg">
     <q-card-section>
       <div class="text-h6">Consulter la liste des produits</div>
     </q-card-section>
@@ -32,10 +38,7 @@
       <q-btn flat>Liste par client</q-btn>
     </q-card-actions>
   </q-card> -->
-  <q-dialog
-    v-model="modal"
-    transition-hide="fade"
-  >
+  <q-dialog v-model="modal" transition-hide="fade">
     <q-card
       class="bg-dark text-white q-pa-sm"
       style="width: 500px; max-width: 80vw"
@@ -48,7 +51,7 @@
       <q-card-section>
         <q-form @submit.prevent="onSubmit" @reset="onReset">
           <q-input
-            label="DesigProduit du produit"
+            label="Designation du produit"
             lazy-rules
             :rules="[
               (val) =>
@@ -117,6 +120,7 @@ export default {
     };
   },
   setup() {
+    const toast = useQuasar();
     const router = useRouter();
     const $q = useQuasar();
     let timer = null;
@@ -126,6 +130,7 @@ export default {
       modal: ref(false),
       timer,
       $q,
+      toast,
     };
   },
   methods: {
@@ -138,7 +143,7 @@ export default {
         this.$q.loading.hide();
         addProduit(this.produit)
           .then(() => {
-            this.router.push(`/produit`);
+            // this.router.push(`/produit`);
             this.toast.notify({
               color: "positive",
               textColor: "white",
@@ -146,6 +151,7 @@ export default {
               message: "Nouveau produit ajouté",
               position: "bottom-right",
             });
+            this.modal = false;
           })
           .catch((error) => {
             console.log(error);
