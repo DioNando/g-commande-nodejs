@@ -71,7 +71,7 @@
           type="number"
           lazy-rules
           v-model="produit.puProduit"
-          suffix="Ar"
+          prefix="Ar"
         />
         <q-input
           label="Stock"

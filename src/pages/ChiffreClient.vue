@@ -1,8 +1,6 @@
 <template>
-  <q-page
-    padding
-    class="full-width no-wrap row justify-start items-start content-start"
-  >
+  <q-page padding class="column">
+    <ChartClient />
     <q-table
       title="Chiffre d'affaire des clients"
       :rows="rows"
@@ -13,19 +11,14 @@
       separator="none"
       bordered
       v-model:selected="selected"
-      class="col q-mr-md"
       hide-selected-banner
       v-model:pagination="pagination"
       :rows-per-page-options="[4, 8, 12, 24, 0]"
       :rows-per-page-label="pagination.label"
+      class="col"
     >
       <template v-slot:top-right>
-        <q-input
-          borderless
-          debounce="300"
-          label="Recherche"
-          v-model="filter"
-        >
+        <q-input borderless debounce="300" label="Recherche" v-model="filter">
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
@@ -47,10 +40,13 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { getChiffreAffaires } from "src/api/client";
-
+import ChartClient from "src/components/ChartClient.vue";
 
 export default defineComponent({
   name: "ChiffreClient",
+  components: {
+    ChartClient,
+  },
   data() {
     return {
       pagination: {

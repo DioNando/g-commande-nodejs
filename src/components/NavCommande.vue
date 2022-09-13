@@ -102,7 +102,7 @@
               label="Prix Unitaire"
               type="number"
               v-model="produit.puProduit"
-              suffix="Ar"
+              prefix="Ar"
               readonly
               borderless
               class="col q-mr-md"
@@ -124,7 +124,7 @@
             />
             <q-input
               label="Montant"
-              suffix="Ar"
+              prefix="Ar"
               type="number"
               v-model="produit.montant"
               readonly

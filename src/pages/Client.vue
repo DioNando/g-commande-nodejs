@@ -92,7 +92,11 @@
             </div>
           </div>
         </q-form>
-        <q-form v-if="selected.length" class="q-mt-lg">
+        <q-form
+          v-if="selected.length"
+          @submit.prevent="onSubmitDates"
+          class="q-mt-lg"
+        >
           <div class="text-h5">Liste des produits commandés</div>
           <div
             class="full-width no-wrap row justify-between items-start content-start"
@@ -106,7 +110,7 @@
               icon="search"
               color="primary"
               label="Consulter"
-              @click="onSubmitDates"
+              type="submit"
             >
               <template v-slot:loading>
                 <q-spinner-dots class="on-left" />
@@ -116,17 +120,14 @@
           </div>
         </q-form>
       </div>
-      <div class="q-mt-lg">
+      <div v-if="this.rowsClient.length" class="q-mt-lg">
         <q-table
           :rows="rowsClient"
           :columns="columnsClient"
-          row-key="numClient"
           flat
-          color="accent"
-          :filter="filter"
+          dark
           separator="none"
           bordered
-          v-model:selected="selected"
           v-model:pagination="paginationAll"
           hide-bottom
         />
@@ -139,7 +140,12 @@
 import { defineComponent } from "vue";
 import { ref } from "vue";
 import { useQuasar } from "quasar";
-import { getAllClients, updateClient, deleteClient, getChiffreAffairesClient } from "src/api/client";
+import {
+  getAllClients,
+  updateClient,
+  deleteClient,
+  getChiffreAffairesClient,
+} from "src/api/client";
 
 export default defineComponent({
   name: "PageClient",
@@ -175,7 +181,7 @@ export default defineComponent({
       var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
       var yyyy = today.getFullYear();
       today = yyyy + "-" + mm + "-" + dd;
-      var lastYear = yyyy-1 + "-" + mm + "-" + dd;
+      var lastYear = yyyy - 1 + "-" + mm + "-" + dd;
       this.date.dateA = lastYear;
       this.date.dateB = today;
     },
@@ -214,7 +220,6 @@ export default defineComponent({
     },
     onSubmitDates() {
       this.simulateProgress(2);
-      console.table(this.date);
       this.timer = setTimeout(() => {
         getChiffreAffairesClient(this.client.numClient, this.date)
           .then((result) => {
@@ -223,14 +228,6 @@ export default defineComponent({
           })
           .catch((error) => {
             console.log(error);
-            this.toast.notify({
-              type: "negative",
-              textColor: "White",
-              icon: "warning",
-              message:
-                "Erreur lors de la mise à jour des informations du client",
-              position: "bottom-right",
-            });
           });
       }, 1500);
     },
@@ -325,7 +322,7 @@ export default defineComponent({
       },
       {
         name: "dateCommande",
-        label: "Nom",
+        label: "Date",
         field: "dateCommande",
         align: "right",
       },

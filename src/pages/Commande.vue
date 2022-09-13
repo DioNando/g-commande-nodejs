@@ -18,12 +18,12 @@
             class="col q-mr-md"
           />
 
-          <q-input
+          <!-- <q-input
             label="Date"
             type="date"
             v-model="commande.dateCommande"
             class="col q-ml-md"
-          />
+          /> -->
         </div>
         <div
           class="full-width no-wrap row justify-between items-start content-start"
@@ -67,7 +67,7 @@
         </div>
         <q-input
           label="Prix Unitaire"
-          suffix="Ar"
+          prefix="Ar"
           type="text"
           v-model="commande.puProduit"
           readonly

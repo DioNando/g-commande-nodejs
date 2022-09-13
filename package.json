@@ -11,11 +11,15 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "apexcharts": "^3.35.4",
     "axios": "^0.21.1",
+    "chart.js": "^3.9.1",
     "core-js": "^3.6.5",
     "quasar": "^2.0.0",
     "vue": "^3.0.0",
+    "vue-chartjs": "^4.1.1",
     "vue-router": "^4.0.0",
+    "vue3-apexcharts": "^1.4.1",
     "vuex": "^4.0.1"
   },
   "devDependencies": {

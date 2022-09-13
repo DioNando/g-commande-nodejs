@@ -67,7 +67,7 @@
           >
             <q-input
               label="Prix Unitaire"
-              suffix="Ar"
+              prefix="Ar"
               type="number"
               v-model="produit.puProduit"
               lazy-rules
